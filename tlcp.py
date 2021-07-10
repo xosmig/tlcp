@@ -6,10 +6,10 @@ import sys
 import glob
 import shutil
 import antlr4
+from typing import List
+
 from antlrgenerated.tlcpLexer import tlcpLexer
 from antlrgenerated.tlcpParser import tlcpParser
-from antlrgenerated.tlcpVisitor import tlcpVisitor
-from antlrgenerated.tlcpListener import tlcpListener
 from visitor import TlcpVisitor
 
 EXTENSION = '.meta.cfg'
@@ -31,35 +31,29 @@ ANTLR_HIDDEN_CHANNEL = 2
 #         raise FileNotFoundError(string)
 
 
-def get_metacfg_files(dirs):
-    return sum((glob.glob(os.path.join(d, "*{ext}".format(ext=EXTENSION))) for d in dirs), start=[])
+def get_metacfg_files(dir_name: str) -> List[str]:
+    return glob.glob(os.path.join(dir_name, "*{ext}".format(ext=EXTENSION)))
 
 
 def process_arguments(args):
-    if not args.directory:
-        for f in args.files:
-            if not os.path.exists(f):
-                print("File '{}' not found.".format(f), file=sys.stderr)
-                sys.exit(2)
-            if not os.path.isfile(f):
-                print("'{}' is not a file.".format(f), file=sys.stderr)
-                sys.exit(2)
+    files = []
+    for f in args.files:
+        if not os.path.exists(f):
+            print("File '{}' not found.".format(f), file=sys.stderr)
+            sys.exit(2)
+        if os.path.isfile(f):
             if not f.endswith(EXTENSION):
                 print("File '{}' is not a {ext} file.".format(f, ext=EXTENSION), file=sys.stderr)
                 sys.exit(2)
+            files += [f]
+        if os.path.isdir(f):
+            files += get_metacfg_files(f)
 
-    if args.directory:
-        for f in args.files:
-            if not os.path.exists(f):
-                print("Directory '{}' not found.".format(f), file=sys.stderr)
-                sys.exit(2)
-            if not os.path.isdir(f):
-                print("'{}' is not a direcory.".format(f), file=sys.stderr)
-                sys.exit(2)
-        args.files = get_metacfg_files(args.files)
-        if not args.files:
-            print("Found no {ext} files.".format(ext=EXTENSION), file=sys.stderr)
-            sys.exit(2)
+    if not files:
+        print("Found no {ext} files.".format(ext=EXTENSION), file=sys.stderr)
+        sys.exit(0)
+
+    args.files = files
 
 
 def process_file(file, args):
@@ -72,12 +66,17 @@ def process_file(file, args):
         shutil.rmtree(models_dir)
     
     os.makedirs(models_dir, exist_ok=True)
-    
+
     input_stream = antlr4.FileStream(file)
     lexer = tlcpLexer(input_stream)
     stream = antlr4.CommonTokenStream(lexer)
     parser = tlcpParser(stream)
     tree = parser.config()
+
+    if parser.getNumberOfSyntaxErrors() > 0:
+        print("Skipping file '{}' due to syntax errors.".format(file), file=sys.stderr, flush=True)
+        return
+
     configs = TlcpVisitor(basic_name=config_name).visit(tree)
 
     for config in configs:
@@ -96,21 +95,29 @@ def main():
         description="A preprocessor for TLC configuration files."
                     "Converts {ext} files to TLC .cfg files.".format(ext=EXTENSION))
     parser.add_argument(
-        "--directory", "-d",
-        default=False,
-        action="store_true",
-        help="Process all {ext} files in a directory.".format(ext=EXTENSION))
-    parser.add_argument(
         "files",
         metavar="FILE",
         type=str,
         nargs="+",
-        help="The {ext} file. Or the directory with {ext} files if -d is used.".format(ext=EXTENSION))
+        help="Path to a {ext} file or a directory with {ext} files.".format(ext=EXTENSION))
     parser.add_argument(
         "--cleanup", "-c",
         default=False,
         action="store_true",
         help="Removes the old {dir} folder before generating new models.".format(dir=GENERATED_MODELS_DIR))
+
+    # TODO: add auto-generated "run_all.sh" scripts in sub-folders.
+    # parser.add_argument(
+    #     "--no–bat",
+    #     default=False,
+    #     action="store_true",
+    #     help="Don't create .bat script files.")
+    # parser.add_argument(
+    #     "--no-sh",
+    #     default=False,
+    #     action="store_true",
+    #     help="Don't create .sh script files.")
+
     args = parser.parse_args()
 
     process_arguments(args)
