@@ -83,7 +83,7 @@ def process_file(file, args):
     config_name = os.path.basename(file)[:-len(EXTENSION)]
     models_dir = os.path.join(config_dir, GENERATED_MODELS_DIR, config_name)
     
-    if os.path.isdir(models_dir) and not os.path.islink(models_dir):
+    if args.cleanup and os.path.isdir(models_dir):
         shutil.rmtree(models_dir)
     
     os.makedirs(models_dir, exist_ok=True)
