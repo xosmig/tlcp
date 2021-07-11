@@ -13,13 +13,13 @@ statement           : blockWIthBeginEnd
                     | tlcStatement
                     ;
 
-blockWIthBeginEnd   : '#BEGIN' block '#END' ;
+blockWIthBeginEnd   : ('#BEGIN'|'#begin') block ('#END'|'#end') ;
 
-families            : '#FAMILIES' familyName+  ;
+families            : ('#FAMILIES'|'#families') familyName+  ;
 familyName          : IDENT ;
 
-oneOf               : '#ONE_OF' option+ '#END' ;
-option              : '#OPTION' '(' optionName ')' block ;
+oneOf               : ('#ONE_OF'|'#one_of') option+ ('#END'|'#end') ;
+option              : ('#OPTION'|'#option') '(' optionName ')' block ;
 optionName          : IDENT ;
 
 tlcStatement        : TLC_SINGULAR_KW IDENT
