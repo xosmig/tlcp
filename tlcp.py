@@ -79,9 +79,9 @@ def create_tla_file(cfg_file: str, extend_module: str):
 
 def process_file(file, args):
     assert file.endswith(EXTENSION)
-    config_dir = os.path.dirname(file)
-    config_name = os.path.basename(file)[:-len(EXTENSION)]
-    models_dir = os.path.join(config_dir, GENERATED_MODELS_DIR, config_name)
+    metacfg_dir = os.path.dirname(file)
+    metacfg_name = os.path.basename(file)[:-len(EXTENSION)]
+    models_dir = os.path.join(metacfg_dir, GENERATED_MODELS_DIR, metacfg_name)
     
     if args.cleanup and os.path.isdir(models_dir):
         shutil.rmtree(models_dir)
@@ -98,23 +98,26 @@ def process_file(file, args):
         print("Skipping file '{}' due to syntax errors.".format(file), file=sys.stderr, flush=True)
         return
 
-    configs = TlcpVisitor(basic_name=config_name).visit(tree)
+    configs = TlcpVisitor(basic_name=metacfg_name).visit(tree)
+    already_copied_tla_files_to = set()
 
     for config in configs:
-        if config.family:
-            family_dir = os.path.join(models_dir, config.family)
-            os.makedirs(family_dir, exist_ok=True)
+        if config.path:
+            cfg_dir = os.path.join(models_dir, config.path)
+            os.makedirs(cfg_dir, exist_ok=True)
         else:
-            family_dir = models_dir
+            cfg_dir = models_dir
 
-        # copy all tla dependencies
-        copy_tla_files(dir_from=config_dir, dir_to=family_dir)
+        if cfg_dir not in already_copied_tla_files_to:
+            # copy all tla dependencies
+            copy_tla_files(dir_from=metacfg_dir, dir_to=cfg_dir)
+            already_copied_tla_files_to.add(cfg_dir)
 
-        cfg_file = os.path.join(family_dir, config.name + ".cfg")
+        cfg_file = os.path.join(cfg_dir, config.name + ".cfg")
         with open(cfg_file, mode="w") as f:
             ret = f.write(config.text)
             assert ret == len(config.text)
-        create_tla_file(cfg_file, extend_module=config_name)
+        create_tla_file(cfg_file, extend_module=metacfg_name)
 
 
 def main():

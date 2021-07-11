@@ -18,8 +18,7 @@ blockWIthBeginEnd   : BEGIN block END ;
 families            : FAMILIES familyName+  ;
 familyName          : IDENT ;
 
-oneOf               : ONE_OF option+ END ;
-
+oneOf               : (ONE_OF | ONE_OF_WITH_SUBFOLDERS) option+ END ;
 option              : OPTION '(' optionName ')' block ;
 optionName          : IDENT ;
 
@@ -55,11 +54,12 @@ tlcKeyword          : CHECK_DEADLOCK_KW
 // Lexer rules 
 /////////////////////////////////////////////////////////////////////
 
-FAMILIES            : '#' F A M I L I E S ;
-BEGIN               : '#' B E G I N ;
-END                 : '#' E N D ;
-ONE_OF              : '#' O N E '_' O F ;
-OPTION              : '#' O P T I O N ;
+FAMILIES                : '#' F A M I L I E S ;
+BEGIN                   : '#' B E G I N ;
+END                     : '#' E N D ;
+ONE_OF_WITH_SUBFOLDERS  : '#' O N E '_' O F WHITESPACE+ W I T H WHITESPACE+ S U B F O L D E R S;
+ONE_OF                  : '#' O N E '_' O F ;
+OPTION                  : '#' O P T I O N ;
 
 STRING              : '"' .*? '"' ;
 TLCP_COMMAND        : '#' LETTER+ ;
