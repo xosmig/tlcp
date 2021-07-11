@@ -56,6 +56,27 @@ def process_arguments(args):
     args.files = files
 
 
+def copy_tla_files(dir_from: str, dir_to: str):
+    for tla_file in glob.glob(os.path.join(dir_from, "*.tla")):
+        if os.path.isfile(tla_file):
+            shutil.copyfile(tla_file, os.path.join(dir_to, os.path.basename(tla_file)))
+
+
+def create_tla_file(cfg_file: str, extend_module: str):
+    assert cfg_file.endswith(".cfg")
+
+    dir_path = os.path.dirname(cfg_file)
+    module_name = os.path.basename(cfg_file)[:-len(".cfg")]
+
+    tla_file = os.path.join(dir_path, module_name + ".tla")
+    with open(tla_file, "w") as f:
+        f.write("---- MODULE {} ----\n".format(module_name))
+        f.write("\n")
+        f.write("EXTENDS {}, TLC\n".format(extend_module))
+        f.write("\n")
+        f.write("====\n")
+
+
 def process_file(file, args):
     assert file.endswith(EXTENSION)
     config_dir = os.path.dirname(file)
@@ -85,9 +106,15 @@ def process_file(file, args):
             os.makedirs(family_dir, exist_ok=True)
         else:
             family_dir = models_dir
-        with open(os.path.join(family_dir, config.name + ".cfg"), mode="w") as f:
+
+        # copy all tla dependencies
+        copy_tla_files(dir_from=config_dir, dir_to=family_dir)
+
+        cfg_file = os.path.join(family_dir, config.name + ".cfg")
+        with open(cfg_file, mode="w") as f:
             ret = f.write(config.text)
             assert ret == len(config.text)
+        create_tla_file(cfg_file, extend_module=config_name)
 
 
 def main():
