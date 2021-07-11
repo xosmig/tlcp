@@ -70,7 +70,12 @@ class TlcpVisitor(tlcpVisitor):
                       [Config.empty_config(self.current_family)])
 
     def visitFamilyStatement(self, ctx: tlcpParser.FamilyStatementContext) -> List[Config]:
-        if self.families and self.current_family not in self.get_family_statement_families(ctx):
+        statement_families = self.get_family_statement_families(ctx)
+        for family in statement_families:
+            if family not in self.families:
+                raise RuntimeError("Unknown family '{}'".format(family))
+
+        if self.families and self.current_family not in statement_families:
             return [Config.empty_config(self.current_family)]
         return self.visit(get_typed_child(ctx, tlcpParser.StatementContext))
 
@@ -96,17 +101,15 @@ class TlcpVisitor(tlcpVisitor):
         return [Config("", text, self.current_family)]
 
     def get_family_statement_families(self, statement: tlcpParser.FamilyStatementContext):
-        families = [family.getText()
-                    for family in get_typed_children(statement, tlcpParser.FamilyNameContext)]
-        for family in families:
-            if family not in self.families:
-                raise RuntimeError("Unknown family '{}'".format(family))
+        statement_families = [
+            family_ctx.getText()
+            for family_ctx in get_typed_children(statement, tlcpParser.FamilyNameContext)]
 
         # statements without families explicitly specified apply to all families
-        if not families:
-            families = self.families
+        if not statement_families:
+            statement_families = self.families
 
-        return families
+        return statement_families
 
     def visitTerminal(self, node):
         raise AssertionError("Unreachable state: some statement was not processed.")
