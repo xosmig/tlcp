@@ -4,7 +4,7 @@ grammar tlcp;
 // Parser rules 
 /////////////////////////////////////////////////////////////////////
 
-config              : families? block ;
+config              : families? block EOF ;
 
 block               : familyStatement* ;
 familyStatement     : (familyName '@')* statement ;
