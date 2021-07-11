@@ -74,6 +74,9 @@ class TlcpVisitor(tlcpVisitor):
             return [Config.empty_config(self.current_family)]
         return self.visit(get_typed_child(ctx, tlcpParser.StatementContext))
 
+    def visitBlockWIthBeginEnd(self, ctx: tlcpParser.BlockWIthBeginEndContext):
+        return self.visit(get_typed_child(ctx, tlcpParser.BlockContext))
+
     def visitOneOf(self, ctx: tlcpParser.OneOfContext) -> List[Config]:
         options = get_typed_children(ctx, tlcpParser.OptionContext)
         return sum((self.visit(option) for option in options), start=[])

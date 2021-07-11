@@ -8,9 +8,12 @@ config              : families? block EOF ;
 
 block               : familyStatement* ;
 familyStatement     : (familyName '@')* statement ;
-statement           : oneOf
+statement           : blockWIthBeginEnd
+                    | oneOf
                     | tlcStatement
                     ;
+
+blockWIthBeginEnd   : '#BEGIN' block '#END' ;
 
 families            : '#FAMILIES' '(' (familyName (',' familyName)*)? ')' ;
 familyName          : IDENT ;
