@@ -15,7 +15,7 @@ statement           : blockWIthBeginEnd
 
 blockWIthBeginEnd   : '#BEGIN' block '#END' ;
 
-families            : '#FAMILIES' '(' (familyName (',' familyName)*)? ')' ;
+families            : '#FAMILIES' familyName+  ;
 familyName          : IDENT ;
 
 oneOf               : '#ONE_OF' option+ '#END' ;
