@@ -1,9 +1,7 @@
 from antlrgenerated.tlcpParser import tlcpParser
 from antlrgenerated.tlcpVisitor import tlcpVisitor
 import antlr4
-from io import StringIO
-from copy import deepcopy
-from typing import Optional, Iterator, List, Tuple
+from typing import Optional, List
 from functools import reduce
 
 
