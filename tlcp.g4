@@ -13,13 +13,14 @@ statement           : blockWIthBeginEnd
                     | tlcStatement
                     ;
 
-blockWIthBeginEnd   : ('#BEGIN'|'#begin') block ('#END'|'#end') ;
+blockWIthBeginEnd   : BEGIN block END ;
 
-families            : ('#FAMILIES'|'#families') familyName+  ;
+families            : FAMILIES familyName+  ;
 familyName          : IDENT ;
 
-oneOf               : ('#ONE_OF'|'#one_of') option+ ('#END'|'#end') ;
-option              : ('#OPTION'|'#option') '(' optionName ')' block ;
+oneOf               : ONE_OF option+ END ;
+
+option              : OPTION '(' optionName ')' block ;
 optionName          : IDENT ;
 
 tlcStatement        : TLC_SINGULAR_KW IDENT
@@ -54,6 +55,12 @@ tlcKeyword          : CHECK_DEADLOCK_KW
 // Lexer rules 
 /////////////////////////////////////////////////////////////////////
 
+FAMILIES            : '#' F A M I L I E S ;
+BEGIN               : '#' B E G I N ;
+END                 : '#' E N D ;
+ONE_OF              : '#' O N E '_' O F ;
+OPTION              : '#' O P T I O N ;
+
 STRING              : '"' .*? '"' ;
 TLCP_COMMAND        : '#' LETTER+ ;
 BOOLEAN             : 'TRUE' | 'FALSE' ;
@@ -73,3 +80,30 @@ WHITESPACE          : (' ' | '\t' | NEWLINE) -> channel(2) ;
 fragment NEWLINE    : ('\r' '\n' | '\n' | '\r') ;
 fragment LETTER     : [a-zA-Z_] ;
 fragment DIGIT      : [0-9] ;
+
+fragment A  :  ('a' | 'A');
+fragment B  :  ('b' | 'B');
+fragment C  :  ('c' | 'C');
+fragment D  :  ('d' | 'D');
+fragment E  :  ('e' | 'E');
+fragment F  :  ('f' | 'F');
+fragment G  :  ('g' | 'G');
+fragment H  :  ('h' | 'H');
+fragment I  :  ('i' | 'I');
+fragment J  :  ('j' | 'J');
+fragment K  :  ('k' | 'K');
+fragment L  :  ('l' | 'L');
+fragment M  :  ('m' | 'M');
+fragment N  :  ('n' | 'N');
+fragment O  :  ('o' | 'O');
+fragment P  :  ('p' | 'P');
+fragment Q  :  ('q' | 'Q');
+fragment R  :  ('r' | 'R');
+fragment S  :  ('s' | 'S');
+fragment T  :  ('t' | 'T');
+fragment U  :  ('u' | 'U');
+fragment V  :  ('v' | 'V');
+fragment W  :  ('w' | 'W');
+fragment X  :  ('x' | 'X');
+fragment Y  :  ('y' | 'Y');
+fragment Z  :  ('z' | 'Z');
